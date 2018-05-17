@@ -1,0 +1,48 @@
+﻿#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+int s=0;
+pthread_mutex_t m=PTHREAD_MUTEX_INITIALIZER;
+
+void* sum(void* arg);
+
+int nums[10000];
+
+int main() 
+{
+    int i;
+    for(i=0;i<10000;i++)
+    {
+        nums[i]=i;
+    }
+    
+    pthread_t t;
+    int j;
+    
+    for(j=1;j<=10;j++)
+    {
+        int p=j*1000;
+        pthread_create(&t,NULL,sum,(void*)p);
+    }
+    pthread_join(t,NULL);
+    
+    printf("%d",s);
+    return 0;
+}
+
+void* sum(void* arg)
+{
+    int end=(int)arg;
+    int start=end-1000;
+    int k;
+    
+    for(k=start;k<end;k++)
+    {
+        pthread_mutex_lock(&m);
+        s+=nums[k];
+        pthread_mutex_unlock(&m);
+    }
+    
+    pthread_exit(NULL);
+}
